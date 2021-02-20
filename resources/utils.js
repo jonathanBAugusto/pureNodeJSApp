@@ -22,7 +22,23 @@ function checkBool(value) {
     return false;
 
   if (typeof (value) == 'string') {
-    return value == 'true';
+    return value.toLowerCase() == 'true';
+  }
+
+  return value;
+}
+
+function checkNumber(value, min = false, max = false) {
+  if (!value || typeof (value) != 'number') {
+    return false;
+  }
+
+  if (min && value < min) {
+    return false;
+  }
+
+  if (max && value > max) {
+    return false;
   }
 
   return value;
@@ -50,10 +66,28 @@ function parseJsonToObject(value) {
   }
 }
 
+function createRandomString(strLength) {
+  strLength = checkNumber(strLength, 0);
+  if (!strLength) {
+    return false;
+  }
+
+  const possibChars = 'abcdefghijklmnoprstuvwxyz@!ABCDEFGHIJKLMNOPRSTUVWXYZ0123456789';
+  let str = '';
+
+  for (let i = 0; i < strLength; i++) {
+    let randChar = possibChars.charAt(Math.floor(Math.random() * possibChars.length));
+    str += randChar;
+  }
+
+  return str;
+}
+
 module.exports = {
   checkBool,
   checkString,
   createIfNotExistsDir,
+  createRandomString,
   hash,
   parseJsonToObject,
 };

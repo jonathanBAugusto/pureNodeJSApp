@@ -23,14 +23,17 @@ lib.create = (dir, file, data, callback) => {
     fs.writeFile(fileDescriptor, stringData, (err) => {
       if (err) {
         callback('Erro writing to new file');
+        return;
       }
 
       fs.close(fileDescriptor, (errClose) => {
         if (errClose) {
           callback('Error closing new file');
+          return;
         }
 
         callback(false);
+        return;
       });
     });
 

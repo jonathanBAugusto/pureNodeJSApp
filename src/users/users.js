@@ -1,5 +1,6 @@
 const Ut = require('../../resources/utils.js');
 const Data = require('../../resources/data.js');
+const Tokens = require('../tokens/tokens.js');
 const { findSourceMap } = require('module');
 
 let users = {};
@@ -49,32 +50,35 @@ users.post = (data, callback) => {
 };
 
 users.get = (data, callback) => {
-  const phone = typeof (data.queryStringObject.phone) == 'string'
-    && (data.queryStringObject.phone.trim().length >= 8 && data.queryStringObject.phone.trim().length <= 11)
-    ? data.queryStringObject.phone.trim()
-    : false;
+  const phone = Ut.checkString(data.queryStringObject.phone, 8, 12);
 
   if (phone) {
-    Data.read('users', phone, (err, data) => {
-      if (!err) {
-        delete data.hashedPassword;
-        callback(200, data);
-      } else {
-        callback(404);
-      }
-    });
+    const token = Ut.checkString(data.headers.token, 25, 25);
+    if (token) {
+      Tokens.verifyToken(token, phone, (tokenIsValid) => {
+        if (tokenIsValid) {
+          Data.read('users', phone, (err, data) => {
+            if (!err) {
+              delete data.hashedPassword;
+              callback(200, data);
+            } else {
+              callback(404);
+            }
+          });
+        } else {
+          callback(403, { 'Error': 'Token is invalid' });
+        }
+      });
+    } else {
+      callback(403, { 'Error': 'The token is missing' });
+    }
   } else {
-    callback(400, {
-      'Error': 'Missing required field'
-    });
+    callback(400, { 'Error': 'Missing required field' });
   }
 };
 
 users.put = (data, callback) => {
-  const phone = typeof (data.body.phone) == 'string'
-    && (data.body.phone.trim().length >= 8 && data.body.phone.trim().length <= 11)
-    ? data.body.phone.trim()
-    : false;
+  const phone = Ut.checkString(data.body.phone, 8, 12);
 
   const firstName = Ut.checkString(data.body.firstName);
   const lastName = Ut.checkString(data.body.lastName);
@@ -82,32 +86,43 @@ users.put = (data, callback) => {
 
   if (phone) {
     if (firstName || lastName || password) {
-      Data.read('users', phone, (err, userData) => {
-        if (!err && userData) {
-          if (firstName) {
-            userData.firstName = firstName;
-          }
-          if (lastName) {
-            userData.lastName = lastName;
-          }
-          if (password) {
-            userData.hashedPassword = Ut.hash(password);
-          }
+      const token = Ut.checkString(data.headers.token, 25, 25);
+      if (token) {
+        Tokens.verifyToken(token, phone, (tokenIsValid) => {
+          if (tokenIsValid) {
+            Data.read('users', phone, (err, userData) => {
+              if (!err && userData) {
+                if (firstName) {
+                  userData.firstName = firstName;
+                }
+                if (lastName) {
+                  userData.lastName = lastName;
+                }
+                if (password) {
+                  userData.hashedPassword = Ut.hash(password);
+                }
 
-          Data.update('users', phone, userData, (err) => {
-            if (!err) {
-              callback(200);
-            } else {
-              console.log(err);
-              callback(500, 'Could not update the user');
-            }
-          })
-        } else {
-          callback(400, {
-            'Error': 'The specified user does not exist'
-          })
-        }
-      });
+                Data.update('users', phone, userData, (err) => {
+                  if (!err) {
+                    callback(200);
+                  } else {
+                    console.log(err);
+                    callback(500, 'Could not update the user');
+                  }
+                })
+              } else {
+                callback(400, {
+                  'Error': 'The specified user does not exist'
+                })
+              }
+            });
+          } else {
+            callback(403, { 'Error': 'Token is invalid' });
+          }
+        });
+      } else {
+        callback(403, { 'Error': 'The token is missing' });
+      }
     } else {
       callback(400, {
         'Error': 'Missing fields to update'
@@ -121,29 +136,37 @@ users.put = (data, callback) => {
 
 };
 users.delete = (data, callback) => {
-  const phone = typeof (data.queryStringObject.phone) == 'string'
-    && (data.queryStringObject.phone.trim().length >= 8 && data.queryStringObject.phone.trim().length <= 11)
-    ? data.queryStringObject.phone.trim()
-    : false;
+  const phone = Ut.checkString(data.queryStringObject.phone, 8, 12);
 
   if (phone) {
-    Data.read('users', phone, (err, data) => {
-      if (!err && data) {
-        Data.delete('users', phone, (err) => {
-          if (!err) {
-            callback(200);
-          } else {
-            callback(500, {
-              'Error': 'Could not delete the specified user'
-            });
-          }
-        });
-      } else {
-        callback(404, {
-          'Error': 'Could not find the specified user'
-        });
-      }
-    });
+    const token = Ut.checkString(data.headers.token, 25, 25);
+    if (token) {
+      Tokens.verifyToken(token, phone, (tokenIsValid) => {
+        if (tokenIsValid) {
+          Data.read('users', phone, (err, data) => {
+            if (!err && data) {
+              Data.delete('users', phone, (err) => {
+                if (!err) {
+                  callback(200);
+                } else {
+                  callback(500, {
+                    'Error': 'Could not delete the specified user'
+                  });
+                }
+              });
+            } else {
+              callback(404, {
+                'Error': 'Could not find the specified user'
+              });
+            }
+          });
+        } else {
+          callback(403, { 'Error': 'Token is invalid' });
+        }
+      });
+    } else {
+      callback(403, { 'Error': 'The token is missing' });
+    }
   } else {
     callback(400, {
       'Error': 'Missing required field'

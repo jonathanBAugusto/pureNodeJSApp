@@ -36,14 +36,14 @@ const uniServer = (req, res) => {
     }
 
     chosenHandler(data, (statusCode, body) => {
+      res.setHeader('Content-type', 'application/json');
+      res.writeHead(statusCode);
+
       statusCode = typeof (statusCode) == 'number' ? statusCode : 200;
 
       body = typeof (body) == 'object' ? body : {};
 
       const bodyString = JSON.stringify(body);
-
-      res.setHeader('Content-type', 'application/json');
-      res.writeHead(statusCode);
 
       res.end(bodyString);
     });
