@@ -1,16 +1,21 @@
-const fs = require('fs');
-const path = require('path');
-const Ut = require('./utils.js');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import * as Ut from './utils.js';
 
-let lib = {};
+const __filename = fileURLToPath(import.meta.url);
 
-lib.baseDir = path.join(__dirname, '/../.data/');
+const Data = {};
 
-lib.create = (dir, file, data, callback) => {
+const dirname = path.dirname(__filename);
 
-  Ut.createIfNotExistsDir(path.join(lib.baseDir, dir));
+Data.baseDir = path.join(dirname, '/../.data/');
 
-  const filePath = path.join(lib.baseDir, dir, file + '.json');
+Data.create = (dir, file, data, callback) => {
+
+  Ut.createIfNotExistsDir(path.join(Data.baseDir, dir));
+
+  const filePath = path.join(Data.baseDir, dir, file + '.json');
 
   fs.open(filePath, 'wx', (err, fileDescriptor) => {
     if (err || !fileDescriptor) {
@@ -40,8 +45,8 @@ lib.create = (dir, file, data, callback) => {
   });
 };
 
-lib.read = (dir, file, callback) => {
-  const filePath = path.join(lib.baseDir, dir, file + '.json');
+Data.read = (dir, file, callback) => {
+  const filePath = path.join(Data.baseDir, dir, file + '.json');
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (!err && data) {
       var parseData = Ut.parseJsonToObject(data);
@@ -52,8 +57,8 @@ lib.read = (dir, file, callback) => {
   });
 }
 
-lib.update = (dir, file, data, callback) => {
-  const filePath = path.join(lib.baseDir, dir, file + '.json');
+Data.update = (dir, file, data, callback) => {
+  const filePath = path.join(Data.baseDir, dir, file + '.json');
   fs.open(filePath, 'r+', (err, fileDescriptor) => {
     if (err || !fileDescriptor) {
       callback('Could not update the file, it may not exits', err);
@@ -82,8 +87,8 @@ lib.update = (dir, file, data, callback) => {
   });
 };
 
-lib.delete = (dir, file, callback) => {
-  const filePath = path.join(lib.baseDir, dir, file + '.json');
+Data.delete = (dir, file, callback) => {
+  const filePath = path.join(Data.baseDir, dir, file + '.json');
   fs.unlink(filePath, (err) => {
     if (err) {
       callback('Error deleting file');
@@ -93,4 +98,4 @@ lib.delete = (dir, file, callback) => {
   });
 };
 
-module.exports = lib;
+export default Data;

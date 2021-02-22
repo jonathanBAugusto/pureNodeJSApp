@@ -1,13 +1,13 @@
-const http = require('http');
-const https = require('https');
-const url = require('url');
-const StringDecoder = require('string_decoder').StringDecoder;
-const fs = require('fs');
-const router = require('./router/router.js');
-const Ut = require('./utils.js')
+import { createServer } from 'http';
+import https from 'https';
+import { parse } from 'url';
+import { StringDecoder } from 'string_decoder';
+import { readFileSync } from 'fs';
+import { routes, handlers } from './router/router.js';
+import { parseJsonToObject } from './utils.js';
 
 const uniServer = (req, res) => {
-  let parsedUrl = url.parse(req.url, true);
+  let parsedUrl = parse(req.url, true);
 
   const path = parsedUrl.pathname;
   const trimmedPath = path.replace(/^\/+|\/+$/g, '');
@@ -25,14 +25,14 @@ const uniServer = (req, res) => {
   req.on('end', () => {
     buffer += decoder.end();
 
-    let chosenHandler = typeof (router.routes[trimmedPath]) !== 'undefined' ? router.routes[trimmedPath] : router.handlers.notFound;
+    let chosenHandler = typeof (routes[trimmedPath]) !== 'undefined' ? routes[trimmedPath] : handlers.notFound;
 
     const data = {
       'trimmedPath': trimmedPath,
       'queryStringObject': queryObject,
       'method': method,
       'headers': headers,
-      'body': Ut.parseJsonToObject(buffer),
+      'body': parseJsonToObject(buffer),
     }
 
     chosenHandler(data, (statusCode, body) => {
@@ -50,22 +50,27 @@ const uniServer = (req, res) => {
   });
 };
 
-const httpServer = http.createServer((req, res) => {
+const httpServer = createServer((req, res) => {
   uniServer(req, res);
 });
 
 const httpsServerOptions = {
-  'key': fs.readFileSync('./https/key.pem'),
-  'cert': fs.readFileSync('./https/cert.pem')
+  'key': readFileSync('./https/key.pem'),
+  'cert': readFileSync('./https/cert.pem')
 };
 
-const httpsServer = http.createServer(httpsServerOptions, (req, res) => {
+const httpsServer = createServer(httpsServerOptions, (req, res) => {
   uniServer(req, res);
 });
 
 
 
-module.exports = {
+export default {
   httpServer,
   httpsServer
+};
+
+export {
+  httpServer,
+  httpsServer,
 };

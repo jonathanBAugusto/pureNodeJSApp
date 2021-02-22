@@ -1,7 +1,6 @@
-const Ut = require('../../resources/utils.js');
-const Data = require('../../resources/data.js');
-const Tokens = require('../tokens/tokens.js');
-const { findSourceMap } = require('module');
+import * as Ut from '../../resources/utils.js';
+import Data from '../../resources/data.js';
+import Tokens from '../tokens/tokens.js';
 
 let users = {};
 
@@ -174,4 +173,4 @@ users.delete = (data, callback) => {
   }
 };
 
-module.exports = users;
+export default users;

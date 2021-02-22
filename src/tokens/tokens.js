@@ -1,5 +1,5 @@
-const Ut = require('../../resources/utils.js');
-const Data = require('../../resources/data.js');
+import * as Ut from '../../resources/utils.js';
+import Data from '../../resources/data.js';
 
 const tokens = {};
 
@@ -136,7 +136,7 @@ tokens.verifyToken = (id, phone, callback) => {
     phone = Ut.checkString(phone, 8, 12);
     if (id && phone) {
         Data.read('tokens', id, (err, tokenData) => {
-            if (tokenData.phone == phone && tokenData.expires > Date.now()) {
+            if (!err && tokenData.phone == phone && tokenData.expires > Date.now()) {
                 callback(true);
             } else {
                 callback(false);
@@ -147,4 +147,4 @@ tokens.verifyToken = (id, phone, callback) => {
     }
 }
 
-module.exports = tokens;
+export default tokens;

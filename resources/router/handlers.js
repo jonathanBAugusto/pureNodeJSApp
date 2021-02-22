@@ -1,22 +1,19 @@
-const Users = require('../../src/users/users.js');
-const Tokens = require('../../src/tokens/tokens.js');
+import Users from '../../src/users/users.js';
+import Tokens from '../../src/tokens/tokens.js';
+import Checks from '../../src/checks/checks.js';
+
 let handlers = {};
 
-handlers.ping = (data, callback) => {
-  callback(200);
-};
-
-handlers.sample = (data, callback) => {
-  callback(406, { 'sample': 'sample Handlers' });
-};
+function checkHttpMethods(method, okMethods = ['post', 'get', 'put', 'delete']) {
+  return okMethods.indexOf(method) > -1;
+}
 
 handlers.notFound = (data, callback) => {
   callback(404);
 };
 
 handlers.users = (data, callback) => {
-  const okMethods = ['post', 'get', 'put', 'delete'];
-  if (okMethods.indexOf(data.method) == -1) {
+  if (!checkHttpMethods(data.method)) {
     callback(405);
     return;
   }
@@ -25,8 +22,7 @@ handlers.users = (data, callback) => {
 };
 
 handlers.tokens = (data, callback) => {
-  const okMethods = ['post', 'get', 'put', 'delete'];
-  if (okMethods.indexOf(data.method) == -1) {
+  if (!checkHttpMethods(data.method)) {
     callback(405);
     return;
   }
@@ -34,4 +30,13 @@ handlers.tokens = (data, callback) => {
   Tokens[data.method](data, callback);
 };
 
-module.exports = handlers;
+handlers.checks = (data, callback) => {
+  if (!checkHttpMethods(data.method)) {
+    callback(405);
+    return;
+  }
+
+  Checks[data.method](data, callback);
+}
+
+export default handlers;
