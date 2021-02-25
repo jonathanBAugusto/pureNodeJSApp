@@ -15,7 +15,7 @@ handlers.notFound = (data, callback) => {
 };
 
 handlers.withoutEndpoint = (data, callback) => {
-  callback(404, { 'Error': 'No endpoints here!' });
+  callback(404, { 'Error': 'No endpoint here!' });
 };
 
 handlers.users = (data, callback) => {
