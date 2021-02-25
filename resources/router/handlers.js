@@ -9,7 +9,9 @@ function checkHttpMethods(method, okMethods = ['post', 'get', 'put', 'delete']) 
 }
 
 handlers.notFound = (data, callback) => {
-  callback(404, { 'Error': 'Nothing here' });
+  callback(404, {
+    'Error': 'There\'s nothing here'
+  });
 };
 
 handlers.noEndpoint = (data, callback) => {
