@@ -25,7 +25,7 @@ const uniServer = (req, res) => {
   req.on('end', () => {
     buffer += decoder.end();
 
-    let chosenHandler = typeof (routes[trimmedPath]) !== 'undefined' ? routes[trimmedPath] : handlers.noEndpoint;
+    let chosenHandler = typeof (routes[trimmedPath]) !== 'undefined' ? routes[trimmedPath] : handlers.notFound;
 
     const data = {
       'trimmedPath': trimmedPath,
