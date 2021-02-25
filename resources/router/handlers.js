@@ -14,7 +14,7 @@ handlers.notFound = (data, callback) => {
   });
 };
 
-handlers.noEndpoint = (data, callback) => {
+handlers.withoutEndpoint = (data, callback) => {
   callback(404, { 'Error': 'No endpoint here' });
 };
 
